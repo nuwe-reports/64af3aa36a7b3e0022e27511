@@ -56,7 +56,29 @@ public class AppointmentController {
          * Implement this function, which acts as the POST /api/appointment endpoint.
          * Make sure to check out the whole project. Specially the Appointment.java class
          */
-        return new ResponseEntity<>(HttpStatus.I_AM_A_TEAPOT);
+        boolean overlaps = false;
+        try {
+            List<Appointment> appointments = appointmentRepository.findAll();
+            for(int i = 0; i<appointments.size(); i++) {
+                overlaps = appointment.overlaps(appointments.get(i));
+                if(overlaps) {
+                    break;
+                }
+            }
+            if(appointment.getStartsAt().isBefore(appointment.getFinishesAt())) {
+                if(!overlaps) {
+                    appointmentRepository.save(appointment);
+                    return new ResponseEntity<>(HttpStatus.OK);
+                }else {
+                    return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+                }
+            }else {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            }
+        }catch(Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }       
     }
 
 
