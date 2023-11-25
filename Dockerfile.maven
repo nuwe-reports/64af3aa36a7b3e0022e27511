@@ -1,0 +1,27 @@
+# Build stage
+
+FROM maven:3.8.4 AS build
+
+WORKDIR /
+
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+COPY src ./src
+COPY resources ./resources
+
+RUN mvn test
+
+RUN mvn package
+
+# Run stage
+ 
+FROM openjdk:latest
+
+WORKDIR /
+
+COPY --from=build /app/target/accenture-techhub-0.0.1-SNAPSHOT.war .
+
+EXPOSE 8080
+
+CMD ["java", "-jar", "accenture-techhub-0.0.1-SNAPSHOT"]
